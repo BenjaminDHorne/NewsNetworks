@@ -19,7 +19,7 @@ def get_connection(database):
 
 def get_max_timestamp(conn):
     try:
-        sql_string = "SELECT max(published_utc) FROM data"
+        sql_string = "SELECT max(published_utc) FROM newsdata"
         cursor = conn.cursor()
         cursor.execute(sql_string)
         return int(cursor.fetchone()[0])
@@ -29,7 +29,7 @@ def get_max_timestamp(conn):
 
 def get_articles_per_source(conn):
     try:
-        sql_string = "SELECT source,count(id) FROM data GROUP BY source"
+        sql_string = "SELECT source,count(id) FROM newsdata GROUP BY source"
         cursor = conn.cursor()
         cursor.execute(sql_string)
         article_count = {str(r[0]):int(r[1]) for r in cursor.fetchall()}
@@ -41,7 +41,7 @@ def get_articles_per_source(conn):
 def get_documents(conn, start_timestamp, window_size=4):
     try:
         end_timestamp = int(start_timestamp) + window_size * 86400  # no. of seconds in a day
-        sql_string = "SELECT id,source,content,published_utc,author FROM data \
+        sql_string = "SELECT id,source,content,published_utc,author FROM newsdata \
         WHERE published_utc > %d AND published_utc < %d \
         ORDER BY published_utc" % (start_timestamp, end_timestamp)
         cursor = conn.cursor()
@@ -121,12 +121,11 @@ def build_candidate_set(ids, sources, documents, sim_threshold=0.85):
 
 # Given connected component g, select pairs using tree heuristic
 def select_most_correct_pairs(c, G, sources):
-    visited = set()
     selected_pairs = list()
     for node in c:
-        visited.add(node)
         e = G.edges(node)
         e = sorted(e, key=lambda u: G.get_edge_data(u[0], u[1])["weight"], reverse=True)
+        e = [ed for ed in e if G.nodes[ed[1]]["published"] < G.nodes[ed[0]]["published"]]
         first = G.get_edge_data(e[0][0], e[0][1])["weight"]
         ties = list()
         i = 0
@@ -136,11 +135,8 @@ def select_most_correct_pairs(c, G, sources):
             i+=1
 
         selected = min(ties, key=lambda t: G.nodes[t]["published"])
-        if selected not in visited:
-            if G.nodes[node]["published"] < G.nodes[selected]["published"]:
-                selected_pairs.append((node, selected))
-            else:
-                selected_pairs.append((selected, node))
+
+        selected_pairs.append((selected,node))
 
         return selected_pairs
 
