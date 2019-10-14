@@ -126,19 +126,21 @@ def select_most_correct_pairs(c, G, sources):
         e = G.edges(node)
         e = sorted(e, key=lambda u: G.get_edge_data(u[0], u[1])["weight"], reverse=True)
         e = [ed for ed in e if G.nodes[ed[1]]["published"] < G.nodes[ed[0]]["published"]]
-        first = G.get_edge_data(e[0][0], e[0][1])["weight"]
-        ties = list()
-        i = 0
-        while  i < len(e) and G.get_edge_data(e[i][0], e[i][1])["weight"] == first:
-            if sources[node] != sources[e[i][1]]:
-                ties.append(e[i][1])
-            i+=1
 
-        selected = min(ties, key=lambda t: G.nodes[t]["published"])
+        if len(e) > 0:
+            first = G.get_edge_data(e[0][0], e[0][1])["weight"]
+            ties = list()
+            i = 0
+            while  i < len(e) and G.get_edge_data(e[i][0], e[i][1])["weight"] == first:
+                if sources[node] != sources[e[i][1]]:
+                    ties.append(e[i][1])
+                i+=1
 
-        selected_pairs.append((selected,node))
+            selected = min(ties, key=lambda t: G.nodes[t]["published"])
 
-        return selected_pairs
+            selected_pairs.append((selected,node))
+
+    return selected_pairs
 
 
 def compute_overlapping_pairs(candidate_pairs, published, sources):
