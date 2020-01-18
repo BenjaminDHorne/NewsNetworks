@@ -6,6 +6,7 @@ from networkx.algorithms.components.connected import connected_components
 from itertools import combinations
 from operator import itemgetter
 
+import argparse
 import networkx as nx
 import numpy as np
 import sqlite3
@@ -76,8 +77,8 @@ def candidate_task(t_pool, task, output, sim_threshold, ids, sources):
         if v >= sim_threshold and sources[ids[i]] != sources[ids[j]] and i > j:
             output[task].append((ids[i], ids[j], v))
 
-def build_candidate_set(ids, sources, documents, sim_threshold=0.85):
-    vectorizer = TfidfVectorizer(stop_words='english')
+def build_candidate_set(ids, sources, documents, sim_threshold=0.85, language="english"):
+    vectorizer = TfidfVectorizer(stop_words=language)
     tfidf = vectorizer.fit_transform(documents)
     print("Computing similarities...")
     pairwise_sim = tfidf * tfidf.T  # similarity among all article that week
@@ -252,14 +253,22 @@ def build_network(all_pairs, article_count_per_source, path):
 
         G.add_weighted_edges_from(weight_edges)
 
-        nx.write_gexf(G, "%s.gexf" % path)
+    nx.write_gml(G, "%s.gml" % path)
 
 
 
 
 def main():
-    pair_file_path = "perfect_pairs.csv"
-    conn = get_connection("/media/6gbvolume/nela_eng.db")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input", type=str, help="Path to nela database")
+    parser.add_argument("output_pair_file", type=str, help="Path to write pair CSV file to")
+    parser.add_argument("output_network_file", type=str, help="Path to save GML file to")
+    parser.add_argument("--language", type=str, help="Language of the database")
+    args = parser.parse_args()
+
+
+    pair_file_path = args.output_pair_file
+    conn = get_connection(args.input)
     initial_date = "2018-01-01"
     end_timestamp = get_max_timestamp(conn)
 
@@ -278,7 +287,7 @@ def main():
             continue
 
 
-        pairs, simi = build_candidate_set(ids,sources,documents)
+        pairs, simi = build_candidate_set(ids,sources,documents, language=args.language)
         selected_pairs = compute_overlapping_pairs(pairs, published, sources)
 
         selected_pairs = aggregrator_heuristic(selected_pairs, sources)
@@ -295,7 +304,7 @@ def main():
     # Collected all pairs, build network
     # Get articles per source
     article_count_per_source = get_articles_per_source(conn)
-    build_network(all_pairs, article_count_per_source, path="FullNetwork")
+    build_network(all_pairs, article_count_per_source, path=args.output_network_file)
 
 
 
