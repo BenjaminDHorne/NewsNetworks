@@ -5,6 +5,7 @@ from datetime import timedelta
 from networkx.algorithms.components.connected import connected_components
 from itertools import combinations
 from operator import itemgetter
+from nltk.corpus import stopwords
 
 import argparse
 import networkx as nx
@@ -77,8 +78,8 @@ def candidate_task(t_pool, task, output, sim_threshold, ids, sources):
         if v >= sim_threshold and sources[ids[i]] != sources[ids[j]] and i > j:
             output[task].append((ids[i], ids[j], v))
 
-def build_candidate_set(ids, sources, documents, sim_threshold=0.85, language="english"):
-    vectorizer = TfidfVectorizer(stop_words=language)
+def build_candidate_set(ids, sources, documents, sim_threshold=0.85, stop_words=None):
+    vectorizer = TfidfVectorizer(stop_words=stop_words)
     tfidf = vectorizer.fit_transform(documents)
     print("Computing similarities...")
     pairwise_sim = tfidf * tfidf.T  # similarity among all article that week
@@ -287,7 +288,12 @@ def main():
             continue
 
 
-        pairs, simi = build_candidate_set(ids,sources,documents, language=args.language)
+        if args.language:
+            stop_words = stopwords.words(args.language)
+        else:
+            stop_words = None
+
+        pairs, simi = build_candidate_set(ids,sources,documents, stop_words=None)
         selected_pairs = compute_overlapping_pairs(pairs, published, sources)
 
         selected_pairs = aggregrator_heuristic(selected_pairs, sources)

@@ -43,6 +43,7 @@ MarkupSafe==1.1.0
 monotonic==1.5
 netifaces==0.10.4
 networkx==2.4
+nltk==3.4.5
 numpy==1.17.4
 oauthlib==2.1.0
 olefile==0.46
