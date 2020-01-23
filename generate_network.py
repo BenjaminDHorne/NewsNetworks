@@ -64,7 +64,7 @@ def get_documents(conn, start_timestamp, window_size=4):
             sources[i] = s
             published[i] = p
             documents_dict[i] = c
-            authors[i] = a
+            authors[i] = a.lower()
 
         # ids(list), sources(dict), documents(list), published_utc(dict)
         return ids, sources, documents, published, documents_dict, authors
@@ -241,20 +241,22 @@ def build_network(all_pairs, article_count_per_source, path):
     weight_dict = {}
 
     for pair in all_pairs:
-        source0 = pair[0].split("--", 1)[0]
-        source1 = pair[1].split("--", 1)[0]
+        source0 = pair[0].split("--", 1)[0].lower()
+        source1 = pair[1].split("--", 1)[0].lower()
         e = (source0,source1)
         if e in weight_dict:
             weight_dict[e] += 1
         else:
             weight_dict[e] = 1
 
+        print("WWW")
+        print(weight_dict.keys())
         weight_edges = [(key[0], key[1], float(weight_dict[key])/article_count_per_source[key[1]])\
                                         for key in weight_dict.keys()]
 
         G.add_weighted_edges_from(weight_edges)
 
-    nx.write_gml(G, "%s.gml" % path)
+    nx.write_gml(G, "%s" % path)
 
 
 
@@ -265,17 +267,31 @@ def main():
     parser.add_argument("output_pair_file", type=str, help="Path to write pair CSV file to")
     parser.add_argument("output_network_file", type=str, help="Path to save GML file to")
     parser.add_argument("--language", type=str, help="Language of the database")
+    parser.add_argument("--initial_date", type=str, help="YYYY-mm-dd string for initial date of articles")
+    parser.add_argument("--verbose", action="store_true", help="Verbose mode")
     args = parser.parse_args()
 
 
+    # Define verbose print mode
+    if args.verbose:
+        def verboseprint(*args):
+            for arg in args:
+                print(args)
+            print()
+    else:
+        verboseprint = lambda *args: None
+
     pair_file_path = args.output_pair_file
     conn = get_connection(args.input)
-    initial_date = "2018-01-01"
+    initial_date = args.initial_date
     end_timestamp = get_max_timestamp(conn)
 
     start_date = datetime.strptime(initial_date, "%Y-%m-%d")
     dtime = timedelta(days=4)
     all_pairs = list()
+    # Open a clean pair file
+    with open(pair_file_path, "w") as fout:
+        pass
     while True:
         int_date = int(start_date.strftime("%s"))
         if int_date >= end_timestamp:
@@ -310,6 +326,7 @@ def main():
     # Collected all pairs, build network
     # Get articles per source
     article_count_per_source = get_articles_per_source(conn)
+    print(article_count_per_source.keys())
     build_network(all_pairs, article_count_per_source, path=args.output_network_file)
 
 
