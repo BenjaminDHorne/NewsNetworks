@@ -319,7 +319,7 @@ def main():
         all_pairs.extend(selected_pairs)
         with open(pair_file_path, "a") as fout:
             for p in selected_pairs:
-                print("%s,%s" % (p[0], p[1]), file=fout)
+                print("%s,%s" % (p[0].replace(",", " "), p[1].replace(",", " ")), file=fout)
 
         start_date += dtime
 
