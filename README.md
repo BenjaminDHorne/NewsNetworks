@@ -3,9 +3,9 @@
 ## Install
 This code is built in Python 3. Requirements can be installed using:
 
-'''
+```
 pip install -r requirements.txt
-'''
+```
 
 ## Use
 
