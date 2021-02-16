@@ -160,7 +160,10 @@ def compute_overlapping_pairs(candidate_pairs, published, sources):
 
 
 def missing_data_heuristic(selected_pairs, documents_dict, sources):
-    missing_sources = ["AP", "Reuters"]
+    '''
+    Adds syndicating sources that may be missing from data collection
+    '''
+    missing_sources = ["AP", "Reuters", "PBS"]
 
     regex_list = list()
     # compile regex for news wire
@@ -185,6 +188,9 @@ def missing_data_heuristic(selected_pairs, documents_dict, sources):
 
 
 def author_heuristic(selected_pairs, authors):
+    '''
+    Fixes pairs if they cite a syndicating source
+    '''
     source_names = dict()
     ap_names=["AP", "Associated Press", "The Associated Press", "AP Reports"]
     zerohedge_names = ["Zero Hedge", "ZeroHedge"]
@@ -222,8 +228,11 @@ def author_heuristic(selected_pairs, authors):
 
 
 def aggregrator_heuristic(selected_pairs, sources):
-    cant_be_first_list = set(["Drudge Report","theRussophileorg"
-     "oann", "Mail", "Yahoo News"])
+    '''
+    Function fix timing error from these outlets
+    '''
+    cant_be_first_list = set(["drudgereport","therussophileorg"
+     "oann", "mail", "yahoonews"])
 
     for i in range(len(selected_pairs)):
         pair = selected_pairs[i]
@@ -266,6 +275,7 @@ def main():
     parser.add_argument("input", type=str, help="Path to nela database")
     parser.add_argument("output_pair_file", type=str, help="Path to write pair CSV file to")
     parser.add_argument("output_network_file", type=str, help="Path to save GML file to")
+    parser.add_arguement("--heuristics_off", type="store_true", help="Turn off heuristic functions (We strongly recommend not doing this)")
     parser.add_argument("--language", type=str, help="Language of the database")
     parser.add_argument("--initial_date", type=str, help="YYYY-mm-dd string for initial date of articles")
     parser.add_argument("--verbose", action="store_true", help="Verbose mode")
@@ -311,10 +321,12 @@ def main():
 
         pairs, simi = build_candidate_set(ids,sources,documents, stop_words=None)
         selected_pairs = compute_overlapping_pairs(pairs, published, sources)
-
-        selected_pairs = aggregrator_heuristic(selected_pairs, sources)
-        selected_pairs = missing_data_heuristic(selected_pairs, documents_dict, sources)
-        selected_pairs = author_heuristic(selected_pairs, authors)
+        if args.heuristics_off:
+            pass 
+        else:
+            selected_pairs = aggregrator_heuristic(selected_pairs, sources)
+            selected_pairs = missing_data_heuristic(selected_pairs, documents_dict, sources)
+            selected_pairs = author_heuristic(selected_pairs, authors)
 
         all_pairs.extend(selected_pairs)
         with open(pair_file_path, "a") as fout:
