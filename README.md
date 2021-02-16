@@ -26,3 +26,21 @@ By default the network will normalize the edge weights by the number of total ar
 ## Legacy
 
 The folder legacy contains code from a very old version of this project. While the two code bases work the same, the updated one is optimized and significantly faster. 
+
+## Citation when using code
+Please cite the following work when using this code:
+
+Horne, B. D., Nørregaard, J., & Adalı, S. (2019, July). Different spirals of sameness: A study of content sharing in mainstream and alternative media. In Proceedings of the International AAAI Conference on Web and Social Media (Vol. 13, pp. 257-266).
+
+Bibtex:
+
+```
+@inproceedings{horne2019different,
+  title={Different spirals of sameness: A study of content sharing in mainstream and alternative media},
+  author={Horne, Benjamin D and N{\o}rregaard, Jeppe and Adal{\i}, Sibel},
+  booktitle={Proceedings of the International AAAI Conference on Web and Social Media},
+  volume={13},
+  pages={257--266},
+  year={2019}
+}
+```
