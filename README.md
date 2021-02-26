@@ -1,6 +1,8 @@
 # NewsNetworks
 
 ## Install
+**Note:** this requirements file is outdated, will be updated soon. The current code in generate_network.py uses a limited set of external libraries.
+
 This code is built in Python 3. Requirements can be installed using:
 
 ```
