@@ -275,7 +275,7 @@ def main():
     parser.add_argument("input", type=str, help="Path to nela database")
     parser.add_argument("output_pair_file", type=str, help="Path to write pair CSV file to")
     parser.add_argument("output_network_file", type=str, help="Path to save GML file to")
-    parser.add_arguement("--heuristics_off", type="store_true", help="Turn off heuristic functions (We strongly recommend not doing this)")
+    parser.add_argument("--heuristics_off", action="store_true", help="Turn off heuristic functions (We strongly recommend not doing this)")
     parser.add_argument("--language", type=str, help="Language of the database")
     parser.add_argument("--initial_date", type=str, help="YYYY-mm-dd string for initial date of articles")
     parser.add_argument("--verbose", action="store_true", help="Verbose mode")
