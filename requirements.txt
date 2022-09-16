@@ -37,7 +37,7 @@ lazr.uri==1.0.3
 lockfile==0.12.2
 louis==3.10.0
 macaroonbakery==1.2.3
-Mako==1.0.7
+Mako==1.2.2
 Markdown==3.1.1
 MarkupSafe==1.1.0
 monotonic==1.5
