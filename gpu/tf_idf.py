@@ -89,6 +89,7 @@ if __name__ == "__main__":
 
     df = pd.read_csv(file)
     df['content'] = df['content'].fillna('')
+    df = df[df['content']!='']
 
     # df[:5].to_csv("test2.csv")
 
@@ -125,9 +126,8 @@ if __name__ == "__main__":
                 print(cp.asnumpy(cp_idx[0]), f"{article_ids.iloc[cp_idx[0]]} - {urls.iloc[cp_idx[0]]} - {tfidf[i][cp_idx[0]]} - {dates.iloc[cp_idx[0]]} - {documents.iloc[cp_idx[0]][:20]}")
 
 
-                a_writer.writerow((article_ids.iloc[i], article_ids.iloc[cp_idx[0]]))
-                # s_writer.writerow((sources.iloc[i], sources.iloc[cp_idx[0]]))
-                if sources.iloc[i] == sources.iloc[cp_idx[0]]:
+                a_writer.writerow((article_ids.iloc[i], article_ids.iloc[cp_idx[0]]))  # article i has date larger than cp_idx[0]
+                if sources.iloc[i] == sources.iloc[cp_idx[0]]:  # Skip self-loops
                     continue
                 source_pairs[(sources.iloc[i], sources.iloc[cp_idx[0]])] += 1
 
